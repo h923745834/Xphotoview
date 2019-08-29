@@ -618,6 +618,12 @@ public class PhotoViewAttacher implements IViewAttacher {
         /**
          * 以cx, cy缩放
          */
+        //缩小到最小时，宽度为viewRect.width()
+        float v = mShowBitmapRect.width() * scale;
+        if(v<mViewRect.width()){
+            //缩小时，如果宽度小于mViewRect.width(),则进行修
+            scale = mViewRect.width()*1f/mShowBitmapRect.width();
+        }
         float left = (cx - Math.abs(cx - oRect.left) * scale);
         float top = (cy - Math.abs(cy - oRect.top) * scale);
 
@@ -1033,7 +1039,7 @@ public class PhotoViewAttacher implements IViewAttacher {
             /**
              * 异步加载缩略图
              */
-            if (mLoadingThread.isAlive()) {
+            if (mLoadingThread!=null&&mLoadingThread.isAlive()) {
                 mLoadingHandler.post(mDecodeThumbRunnable);
             }
         }
@@ -1042,8 +1048,13 @@ public class PhotoViewAttacher implements IViewAttacher {
             @Override
             public void run()
             {
-                decodeThumbUnitBitmap();
-                onSetImageFinished(true);
+                try{
+
+                    decodeThumbUnitBitmap();
+                    onSetImageFinished(true);
+                }catch (Exception e){
+
+                }
             }
         };
 

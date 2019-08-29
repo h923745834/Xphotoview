@@ -6,6 +6,7 @@ import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
+import android.util.Log;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
@@ -19,6 +20,7 @@ import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
 import com.hsd.fjxm.xphotoview.R;
+import com.piclib.XLog;
 import com.piclib.view.Xphoto.XPhotoView;
 
 import java.io.File;
@@ -34,9 +36,13 @@ import java.util.Map;
  * email: 196425254@qq.com
  */
 public class GlideImageLoader implements TransferImageLoader {
+
     private Context context;
     private String mUrl;
     private Map<String,Boolean> failMap = new HashMap<>();
+    private final String TAG = "GlideImageLoader";
+
+
     private final RequestOptions ResourceOptions = new RequestOptions()
                      .diskCacheStrategy(DiskCacheStrategy.RESOURCE)//缓存转换后的图片
                      .placeholder(R.mipmap.ic_launcher)
@@ -53,7 +59,8 @@ public class GlideImageLoader implements TransferImageLoader {
         return new GlideImageLoader(context);
     }
 
-    private void displayImage(String url, final ImageView target, RequestOptions options, RequestListener listener, ImageLoadingProgressListener progressListener) {
+    private void displayImage(final String url, final ImageView target, RequestOptions options, RequestListener listener ) {
+
         CustomTarget<File> simpleTarget = new CustomTarget<File>() {
 
             @Override
@@ -67,6 +74,7 @@ public class GlideImageLoader implements TransferImageLoader {
             @Override
             public void onLoadCleared(@Nullable Drawable placeholder) {
                 //取消下载时被调用
+                ProgressInterceptor.removeListener(url);
             }
         };
         if (TextUtils.isEmpty(url)) {
@@ -80,7 +88,7 @@ public class GlideImageLoader implements TransferImageLoader {
     }
 
     @Override
-    public void showImage(String imageUrl, ImageView imageView, Drawable placeholder, final SourceCallback sourceCallback) {
+    public void showImage(final String imageUrl, ImageView imageView, Drawable placeholder, final SourceCallback sourceCallback) {
 
         DataOptions.placeholder(placeholder);
         DataOptions.error(placeholder);
@@ -90,6 +98,7 @@ public class GlideImageLoader implements TransferImageLoader {
             public boolean onLoadFailed(@Nullable GlideException e, Object model, Target target, boolean isFirstResource) {
                 if (sourceCallback != null)
                     sourceCallback.onDelivered(STATUS_DISPLAY_FAILED);
+                ProgressInterceptor.removeListener(imageUrl);
                 return false;
             }
 
@@ -99,10 +108,20 @@ public class GlideImageLoader implements TransferImageLoader {
                     sourceCallback.onFinish();
                     sourceCallback.onDelivered(STATUS_DISPLAY_SUCCESS);
                 }
+                ProgressInterceptor.removeListener(imageUrl);
                 return false;
             }
 
-        }, new ImageLoadingProgressListener());
+        });
+        ProgressInterceptor.addListener(imageUrl, new ProgressListener() {
+            @Override
+            public void onProgress(int progress) {
+                XLog.d(TAG,"loading percent："+progress);
+                if (sourceCallback != null) {
+                    sourceCallback.onProgress(progress);
+                }
+            }
+        });
     }
 
     @Override

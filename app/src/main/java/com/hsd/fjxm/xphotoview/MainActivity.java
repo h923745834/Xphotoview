@@ -1,6 +1,5 @@
 package com.hsd.fjxm.xphotoview;
 
-import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -12,6 +11,7 @@ import com.bumptech.glide.Glide;
 import com.piclib.loader.GlideImageLoader;
 import com.piclib.style.index.CircleIndexIndicator;
 import com.piclib.style.progress.ProgressBarIndicator;
+import com.piclib.style.progress.ProgressPieIndicator;
 import com.piclib.transfer.TransferConfig;
 import com.piclib.transfer.Transferee;
 
@@ -36,18 +36,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void initdata(){
-//        try {
-//            urlList.add("http://watermark.image.7723.cn/t_style_mod/attachments/icons/13/mJjrsDkBbW4SpsJMM6ZHxpBiQTiPJcGX.png");
-//            String[] list = getAssets().list("");
-//            for(String name:list){
-//                if(name.endsWith("jpg")||name.endsWith("gif"))
-//                urlList.add(;
-//            }
-//            urlList.add("file:///android_asset/pikacu.gif");
-            urlList.add("file:///android_asset/long2.jpg");
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
+        try {
+            urlList.add("http://watermark.image.7723.cn/t_style_mod/attachments/icons/13/mJjrsDkBbW4SpsJMM6ZHxpBiQTiPJcGX.png");
+            String[] list = getAssets().list("");
+            for(String name:list){
+                if(name.endsWith("jpg")||name.endsWith("gif"))
+                urlList.add("file:///android_asset/"+name);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
     private void initview() {
         mRecyclerView = findViewById(R.id.recyclerview);
@@ -61,11 +59,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mRecyclerView.setLayoutManager(manager);
         mRecyclerView.setAdapter(new MyAdapter(this,urlList));
         GlideImageLoader.with(this).load(urlList.get(0)).intoPre(mImage1);
-//        GlideImageLoader.with(this).load(urlList.get(1)).intoPre(mImage2);
-//        GlideImageLoader.with(this).load(urlList.get(2)).intoPre(mImage3);
+        GlideImageLoader.with(this).load(urlList.get(1)).intoPre(mImage2);
+        GlideImageLoader.with(this).load(urlList.get(2)).intoPre(mImage3);
         viewList.add(mImage1);
-//        viewList.add(mImage2);
-//        viewList.add(mImage3);
+        viewList.add(mImage2);
+        viewList.add(mImage3);
     }
 
     @Override
@@ -80,7 +78,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 .setThumbnailImageList(urlList)
                 .setMissPlaceHolder(R.mipmap.ic_launcher)
                 .setErrorPlaceHolder(R.mipmap.ic_launcher)
-                .setProgressIndicator(new ProgressBarIndicator())
+                .setProgressIndicator(new ProgressPieIndicator())
                 .setIndexIndicator(new CircleIndexIndicator())
                 .setJustLoadHitImage(true)
                 .setNowThumbnailIndex(position);
